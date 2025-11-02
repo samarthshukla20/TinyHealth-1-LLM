@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Fact Checker</title>
+    <!-- Load Tailwind CSS from CDN (Allowed in web apps) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure a custom font and colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#1D4ED8', // Indigo 700
+                        'secondary': '#60A5FA', // Blue 400
+                        'accent': '#F59E0B', // Amber 500
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles for professional appearance */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0f2f1 0%, #ffffff 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 960px;
+        }
+        .shadow-custom {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.05);
+        }
+        .btn-primary {
+            transition: all 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(29, 78, 216, 0.3);
+        }
+        /* Custom scrollbar for results */
+        #results-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #results-container::-webkit-scrollbar-thumb {
+            background-color: #60A5FA;
+            border-radius: 4px;
+        }
+        #results-container::-webkit-scrollbar-track {
+            background-color: #e5e7eb;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="container mx-auto">
+        <header class="text-center py-6">
+            <h1 class="text-4xl font-extrabold text-gray-800 mb-2 flex items-center justify-center">
+                <svg class="w-8 h-8 mr-3 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.696 5.176-1.406 9-6.105 9-11.696C21 9 20.984 7.674 20.618 6.984z"></path></svg>
+                Reel Health Fact Checker
+            </h1>
+            <p class="text-lg text-gray-600">Verify health claims using the power of AI and Google Search Grounding.</p>
+        </header>
+
+        <main class="bg-white p-6 md:p-10 rounded-xl shadow-custom">
+            
+            <!-- API Key Input -->
+            <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <label for="apiKey" class="block text-sm font-semibold text-gray-700 mb-2">
+                    Gemini API Key: <span class="text-xs font-normal text-gray-500">(Required for analysis)</span>
+                </label>
+                <input type="password" id="apiKey" class="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-secondary focus:border-secondary text-base transition duration-150" placeholder="Paste your Gemini API Key here">
+            </div>
+
+            <!-- Claim Input -->
+            <div class="mb-6">
+                <label for="claimInput" class="block text-lg font-semibold text-gray-700 mb-3">
+                    Paste Health Claim or Reel Link:
+                </label>
+                <input type="text" id="claimInput" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary text-base shadow-sm transition duration-150" 
+                       placeholder="E.g., 'Applying tea tree oil cures acne' or 'https://www.instagram.com/reel/...' ">
+            </div>
+
+            <!-- Submit Button -->
+            <button id="checkButton" class="btn-primary w-full bg-primary text-white font-bold py-3 rounded-lg shadow-lg uppercase tracking-wider disabled:opacity-50" disabled>
+                Check Fact or Myth
+            </button>
+
+            <!-- Loading Indicator & Error Message -->
+            <div id="statusMessage" class="hidden mt-6 p-4 rounded-lg flex items-center justify-center font-medium text-sm">
+                <svg id="spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Analyzing claim... This may take a moment.
+            </div>
+
+            <!-- Results Display Container -->
+            <div id="results-container" class="mt-8 pt-6 border-t border-gray-200">
+                <p id="initialMessage" class="text-center text-gray-500 italic">
+                    Enter a health claim above to get a fact-checked analysis grounded by Google Search.
+                </p>
+                <div id="responseText" class="hidden bg-gray-50 p-6 rounded-lg shadow-inner text-base text-gray-700 max-h-96 overflow-y-auto whitespace-pre-wrap"></div>
+                <div id="sourcesList" class="mt-6"></div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set up variables
+            const claimInput = document.getElementById('claimInput');
+            const apiKeyInput = document.getElementById('apiKey');
+            const checkButton = document.getElementById('checkButton');
+            const statusMessage = document.getElementById('statusMessage');
+            const responseTextDiv = document.getElementById('responseText');
+            const initialMessage = document.getElementById('initialMessage');
+            const sourcesListDiv = document.getElementById('sourcesList');
+
+            // --- Event Listeners and Initial Setup ---
+
+            // Enable button only when both fields are filled
+            function updateButtonState() {
+                checkButton.disabled = !(claimInput.value.trim() && apiKeyInput.value.trim());
+            }
+
+            apiKeyInput.addEventListener('input', updateButtonState);
+            claimInput.addEventListener('input', updateButtonState);
+
+            checkButton.addEventListener('click', handleFactCheck);
+
+            // --- Core Functions ---
+
+            async function handleFactCheck() {
+                const userClaim = claimInput.value.trim();
+                const apiKey = apiKeyInput.value.trim();
+                const TIMEOUT_MS = 30000; // 30 seconds timeout
+
+                if (!userClaim || !apiKey) {
+                    setStatus('Please enter both the API Key and a claim/URL.', 'bg-red-100 text-red-800 border-red-300', false);
+                    return;
+                }
+
+                // 1. Set Loading State
+                initialMessage.classList.add('hidden');
+                responseTextDiv.classList.add('hidden');
+                sourcesListDiv.innerHTML = '';
+                
+                setStatus('Analyzing claim... This may take a moment.', 'bg-yellow-100 text-yellow-800 border-yellow-300', true);
+                checkButton.disabled = true;
+
+                try {
+                    // Use AbortController for guaranteed timeout
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+                    const result = await factCheckClaim(userClaim, apiKey, controller.signal);
+                    
+                    // Clear timeout if successful
+                    clearTimeout(timeoutId);
+                    
+                    // 2. Display Results
+                    const formattedText = formatGeminiResponse(result.text);
+                    responseTextDiv.innerHTML = formattedText;
+                    responseTextDiv.classList.remove('hidden');
+                    
+                    displaySources(result.sources);
+                    setStatus('Analysis Complete.', 'bg-green-100 text-green-800 border-green-300', false);
+
+                } catch (error) {
+                    // 3. Handle Error
+                    console.error('Fact checking failed:', error);
+                    let errorMessage = `Error: ${error.message}`;
+                    
+                    if (error.name === 'AbortError') {
+                         errorMessage = 'Request Timed Out (30s limit exceeded). This usually indicates a network issue or a blocked API key.';
+                    } else if (error.message.includes('400')) {
+                        errorMessage = 'Verification Failed: Please check your API Key and ensure it is valid/active.';
+                    } else if (error.message.includes('429')) {
+                        errorMessage = 'Rate Limit Exceeded: Too many requests. Please wait a moment and try again.';
+                    }
+                    
+                    setStatus(errorMessage, 'bg-red-100 text-red-800 border-red-300', false);
+                    
+                } finally {
+                    checkButton.disabled = false;
+                }
+            }
+
+            /**
+             * Sets the visible status message for the user.
+             */
+            function setStatus(message, classes, showSpinner) {
+                // IMPORTANT: Ensure elements are not null before accessing classList
+                const spinner = document.getElementById('spinner');
+
+                statusMessage.textContent = message;
+                statusMessage.className = `mt-6 p-4 rounded-lg flex items-center justify-center font-medium text-sm border ${classes}`;
+                statusMessage.classList.remove('hidden');
+                
+                if (showSpinner) {
+                    spinner.classList.remove('hidden');
+                    // Check if spinner is already a child before prepending
+                    if (statusMessage.firstChild !== spinner) {
+                        statusMessage.prepend(spinner);
+                    }
+                } else {
+                    spinner.classList.add('hidden');
+                }
+
+                // Hide status message after 10 seconds if not a persistent error
+                if (!showSpinner && !classes.includes('red')) {
+                    setTimeout(() => statusMessage.classList.add('hidden'), 10000);
+                }
+            }
+
+            /**
+             * Formats the raw response text from the LLM for better display.
+             */
+            function formatGeminiResponse(text) {
+                const lines = text.split('\n').filter(line => line.trim() !== '');
+                let html = '';
+
+                lines.forEach(line => {
+                    if (line.startsWith('**Verdict')) {
+                        // Make the Verdict section large and prominent
+                        html += `<p class="text-2xl font-bold mb-4 mt-2 text-primary">${line.replace(/\*\*/g, '').trim()}</p>`;
+                    } else if (line.startsWith('**')) {
+                        // Section headers
+                        html += `<p class="text-lg font-semibold mt-4 mb-2 text-gray-800">${line.replace(/\*\*/g, '').trim()}</p>`;
+                    } else {
+                        html += `<p class="mb-2">${line.trim()}</p>`;
+                    }
+                });
+                return html;
+            }
+
+            /**
+             * Implements exponential backoff for API retries and calls the Gemini API.
+             * @param {AbortSignal} signal - Signal to abort the request.
+             */
+            async function factCheckClaim(userClaim, apiKey, signal, attempt = 0) {
+                const MAX_RETRIES = 5;
+                const BASE_DELAY_MS = 1000;
+
+                const model = 'gemini-2.5-flash-preview-09-2025';
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+                const systemPrompt = `You are an expert, neutral, and highly reliable health fact-checker. Your task is to analyze the user-provided claim.
+                
+                FIRST, determine if the claim is related to health, fitness, diet, medicine, or body science.
+                
+                IF the claim is NOT health-related, you MUST respond ONLY with the following text: **Verdict: Not a Health Claim**\\n**Analysis:** This tool is specifically designed to check claims related to health, wellness, or medicine. Please enter a relevant claim.\\n**Recommendation:** N/A.
+                
+                IF the claim IS health-related, proceed to verify it using the provided search results (Google Search grounding), and provide a clear, concise verdict.
+                
+                The health-related response MUST follow this structure, starting with the verdict:
+                **Verdict (e.g., Myth, Fact, Partially True, Misleading):** State the conclusion clearly and concisely.
+                **Analysis:** Explain in detail why the claim is true, false, or misleading based *only* on the evidence from the search results. Provide key medical or scientific context.
+                **Recommendation:** Offer simple, safe advice (e.g., 'Consult a dermatologist,' 'Rely on FDA-approved treatments.').
+                Keep the entire response professional and easy to understand for a general audience.`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: `Check the accuracy of this claim, which might be a URL: "${userClaim}"` }] }],
+                    tools: [{ "google_search": {} }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        signal: signal // Pass the abort signal
+                    });
+
+                    if (signal.aborted) {
+                        throw new DOMException("Aborted", "AbortError");
+                    }
+
+                    if (!response.ok) {
+                        // Handle rate limiting with retry logic
+                        if (response.status === 429 && attempt < MAX_RETRIES) {
+                            const delay = BASE_DELAY_MS * (2 ** attempt);
+                            console.warn(`Rate limit hit (429). Retrying in ${delay}ms...`);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            return factCheckClaim(userClaim, apiKey, signal, attempt + 1);
+                        }
+                        // Throw error for status codes like 400, 401, 500
+                        throw new Error(`API Request failed with status: ${response.status} ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+
+                    if (!candidate || !candidate.content?.parts?.[0]?.text) {
+                        throw new Error("Invalid response format from the API.");
+                    }
+
+                    const text = candidate.content.parts[0].text;
+                    let sources = [];
+                    const groundingMetadata = candidate.groundingMetadata;
+
+                    if (groundingMetadata && groundingMetadata.groundingAttributions) {
+                        sources = groundingMetadata.groundingAttributions
+                            .map(attribution => ({
+                                uri: attribution.web?.uri,
+                                title: attribution.web?.title,
+                            }))
+                            .filter(source => source.uri && source.title);
+                    }
+
+                    return { text, sources };
+
+                } catch (error) {
+                    // Retry for network/fetch errors, otherwise re-throw
+                    if (attempt < MAX_RETRIES && (error.message.includes('Failed to fetch') || error.name === 'TypeError')) {
+                        const delay = BASE_DELAY_MS * (2 ** attempt);
+                        console.warn(`Connection error. Retrying in ${delay}ms...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        return factCheckClaim(userClaim, apiKey, signal, attempt + 1);
+                    }
+                    throw error; // Re-throw all other errors (like AbortError, 400, 401, etc.)
+                }
+            }
+
+            /**
+             * Displays the citation sources.
+             */
+            function displaySources(sources) {
+                sourcesListDiv.innerHTML = ''; // Clear previous content
+
+                if (sources.length === 0) {
+                    sourcesListDiv.innerHTML = '<p class="text-sm text-gray-500 italic">No direct sources found for grounding.</p>';
+                    return;
+                }
+
+                let html = '<h3 class="text-lg font-bold text-gray-700 mb-3 border-b pb-1">Grounded Sources:</h3>';
+                html += '<ul class="space-y-2">';
+
+                sources.forEach((source, index) => {
+                    html += `
+                        <li class="text-sm">
+                            <span class="font-bold text-secondary mr-1">${index + 1}.</span>
+                            <a href="${source.uri}" target="_blank" class="text-primary hover:underline transition duration-150">
+                                ${source.title}
+                            </a>
+                            <p class="text-xs text-gray-500 truncate ml-5">${source.uri}</p>
+                        </li>
+                    `;
+                });
+
+                html += '</ul>';
+                sourcesListDiv.innerHTML = html;
+            }
+        }); // End DOMContentLoaded
+    </script>
+</body>
+</html>
