@@ -1,0 +1,6 @@
+torch==2.3.1
+transformers==4.40.1
+peft==0.10.0
+flask
+accelerate
+bitsandbytes
