@@ -1,56 +1,80 @@
 # 🩺 TinyHealth-1: Specialized LLM for Health Myth Checking
 
-This project demonstrates a full-stack, end-to-end Machine Learning Operations (MLOps) workflow. The goal was to build a highly specialized Large Language Model (LLM) capable of fact-checking complex health claims, designed specifically to run on resource-constrained hardware.
+This project showcases a complete Machine Learning Operations (MLOps) workflow for building a specialized, resource-efficient Large Language Model (LLM) designed to combat health misinformation.
 
-The core achievement was successfully training and deploying a model that focuses **only** on medical queries.
+The model was fine-tuned on a 4GB VRAM GPU to strictly filter non-medical queries and provide structured verdicts (Fact/Myth) for health claims.
 
 ---
 
-## 🚀 Live Application & Deployment
+## 🚀 Live Application & Model
 
-The custom-trained model is hosted on Hugging Face Spaces and runs as a secure, dedicated API endpoint.
+The custom-trained model is hosted on Hugging Face Spaces and runs as a live API endpoint.
 
-* **Live App Demo:** [Insert the direct link to your running Hugging Face Space URL here]
+* **Live App Demo:** You can run the index.html file present in this repository for live demo.
 * **Model Repository:** [Insert the link to your Hugging Face Model Repo: `https://huggingface.co/samarthshukla/TinyHealth-1`]
 
 ---
 
-## ✨ Project Highlights
+## ⚙️ Local Replication Guide (Run the Model on Your PC)
 
-* **Hardware Efficiency:** Successfully trained and merged the model using **QLoRA** on a **consumer-grade 4GB VRAM GPU**.
-* **Domain Focus:** The model provides structured verdicts (Fact/Myth) and comprehensive analysis for health claims only.
-* **Robust Filtering:** The model is highly accurate in rejecting non-health topics (e.g., coding, history, sports), which was achieved by balancing thousands of positive facts with over **75 explicit rejection examples**.
+This guide directs users on how to recreate the specialized model and run local inference using your GPU.
 
----
+### Step 1: Prerequisites
 
-## 🛠️ Technical Stack & Workflow
+You must have the following software installed:
 
-This solution replaces expensive cloud APIs with a fully customizable, self-hosted LLM.
+* **Python 3.9+**
+* **NVIDIA GPU with CUDA:** Required for fast training and inference.
 
-| Component | Tool / Library | Role in Project |
-| :--- | :--- | :--- |
-| **Base Model** | `TinyLlama/1.1B-Chat-v1.0` | Small, efficient base model selected to fit VRAM constraints. |
-| **Fine-Tuning** | **PyTorch**, `trl` library, **QLoRA** | Framework and technique used for parameter-efficient training. |
-| **Data Source** | **MedQuAD** + Custom Data | Factual base combined with custom instruction-tuning for filtering. |
-| **API Backend** | **Flask** (Python) + `app.py` | Serves the model for inference in the Hugging Face Space. |
-| **Hosting** | **Hugging Face Spaces** | Cloud platform used to host the model and run the Flask API on T4 GPU hardware. |
-| **Frontend** | `index.html`, **Tailwind CSS** | The single-page application that calls the live API endpoint. |
+### Step 2: Set Up the Environment
 
----
-
-## ⚙️ How to Replicate
-
-The repository contains the full source code for the front-end, API, and training pipeline (`finetune_health.py`).
-
-1.  **Clone the Repository:**
+1.  **Clone the repository and navigate into the folder:**
     ```bash
     git clone https://github.com/samarthshukla20/TinyHealth-1-LLM
+    cd [Your Repo Folder Name]
     ```
-2.  **Install Dependencies:**
+2.  **Install Essential Libraries:** Install the core deep learning and ML frameworks used for training and inference.
     ```bash
-    pip install torch transformers peft datasets pandas
+    pip install torch transformers peft accelerate bitsandbytes trl datasets pandas
     ```
-3.  **Run Inference Locally:** Once you have the model files, you can test inference using the included Python script:
+
+### Step 3: Train the Specialized Model
+
+The training process uses the optimized **QLoRA** technique to adapt the TinyLlama model efficiently.
+
+1.  **Check Data:** Ensure the training data (`health_myth_data.jsonl`) is in the main directory.
+2.  **Start Training:** Execute the training script. This process will download the base model and run for several hours (4–8 hours, depending on GPU speed).
     ```bash
-    python check_model.py "Drinking lemon water cures inflammation."
+    python finetune_health.py
     ```
+
+### Step 4: Run Local Inference (Check the Model)
+
+Once the training completes and the final model files are saved into the `./health_myth_checker_tinylama/final_merged_model` folder, you can test its performance locally.
+
+1.  **Execute the Inference Script:** Run the following command with a test claim enclosed in quotes:
+    ```bash
+    python check_model.py "Drinking a tablespoon of apple cider vinegar every morning burns belly fat."
+    ```
+2.  **Expected Output:** The model will load onto your GPU and return the structured verdict:
+    ```
+    ==================================================
+    Checking Claim: 'Drinking a tablespoon...'
+    ==================================================
+    **Verdict: Myth**
+    **Analysis:** [Detailed Explanation]
+    **Recommendation:** [Safe Advice]
+    ==================================================
+    ```
+
+---
+
+## 🔎 Explanation of Deployment Files
+
+| File Name | Role in the Project |
+| :--- | :--- |
+| **`finetune_health.py`** | The complete script used to **train the model** (Step 3). |
+| **`check_model.py`** | The Python script used to **test the model locally** (Step 4). |
+| **`app.py`** | The **Flask API server** code. This is the **live backend** running on Hugging Face Spaces that receives requests from the front-end website (`index.html`). |
+| **`requirements.txt`** | The list of Python libraries the **Hugging Face Space** needs to install to run `app.py`. |
+| **`index.html`** | The **Frontend** (website) that the user interacts with. It contains the JavaScript logic to call the live API endpoint defined in `app.py`. |
