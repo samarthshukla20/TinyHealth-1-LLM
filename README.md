@@ -10,8 +10,8 @@ The model was fine-tuned on a 4GB VRAM GPU to strictly filter non-medical querie
 
 The custom-trained model is hosted on Hugging Face Spaces and runs as a live API endpoint.
 
-* **Live App Demo:** You can run the index.html file present in this repository for live demo.
-* **Model Repository:** [Insert the link to your Hugging Face Model Repo: `https://huggingface.co/samarthshukla/TinyHealth-1`]
+* **Live App Demo:** https://reel-check-web.vercel.app/
+* **Model Repository:**  https://huggingface.co/samarthshukla/TinyHealth-1
 
 ---
 
@@ -31,7 +31,7 @@ You must have the following software installed:
 1.  **Clone the repository and navigate into the folder:**
     ```bash
     git clone https://github.com/samarthshukla20/TinyHealth-1-LLM
-    cd [Your Repo Folder Name]
+    cd TinyHealth-1-LLM
     ```
 2.  **Install Essential Libraries:** Install the core deep learning and ML frameworks used for training and inference.
     ```bash
