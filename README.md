@@ -10,7 +10,7 @@ The model was fine-tuned on a 4GB VRAM GPU to strictly filter non-medical querie
 
 The custom-trained model is hosted on Hugging Face Spaces and runs as a live API endpoint.
 
-* **Live App Demo:** https://reel-check-web.vercel.app/
+* **Live App Demo:** https://tinyhealthai.vercel.app/
 * **Model Repository:**  https://huggingface.co/samarthshukla/TinyHealth-1
 
 ---
