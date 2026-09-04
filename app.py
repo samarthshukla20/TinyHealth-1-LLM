@@ -61,10 +61,10 @@ def check_claim():
 
         # Construct the exact prompt format the model was trained on
         prompt = (
-            "## Health Claim Checker\n\n"
-            f"### Claim\n{claim}\n\n"
-            "### Response\n"
-        )
+            "You are a medical fact-checker. Verify if the following claim is a myth or fact.\n\n"
+            f"Claim: {claim}\n"
+            "Verdict (Myth / Fact / False):"
+            )
         
         # Run inference
         result = qa_pipeline(prompt)
