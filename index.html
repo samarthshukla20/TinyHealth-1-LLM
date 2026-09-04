@@ -1,1061 +1,24 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
-<title>TinyHealth — AI Health Fact Checker</title>
+    <title>TinyHealth - AI Health Fact Checker</title>
 
-<!-- Google Font -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
 
-<style>
-
-    /* ============================
-       RESET & VARIABLES
-    ============================ */
-
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    :root {
-        --primary: #2563eb;
-        --primary-dark: #1d4ed8;
-        --secondary: #06b6d4;
-
-        --background: #f7f9fc;
-        --card: rgba(255, 255, 255, 0.8);
-
-        --text: #172033;
-        --muted: #6b7280;
-
-        --border: rgba(148, 163, 184, 0.2);
-
-        --success: #16a34a;
-        --warning: #f59e0b;
-        --danger: #ef4444;
-    }
-
-
-    /* ============================
-       BODY
-    ============================ */
-
-    body {
-        font-family: "DM Sans", sans-serif;
-        background:
-            radial-gradient(
-                circle at 10% 10%,
-                rgba(37, 99, 235, 0.12),
-                transparent 30%
-            ),
-            radial-gradient(
-                circle at 90% 20%,
-                rgba(6, 182, 212, 0.12),
-                transparent 30%
-            ),
-            linear-gradient(
-                180deg,
-                #f8fbff 0%,
-                #f4f7fb 100%
-            );
-
-        min-height: 100vh;
-
-        color: var(--text);
-
-        overflow-x: hidden;
-    }
-
-
-    /* ============================
-       BACKGROUND BLOBS
-    ============================ */
-
-    .background-orb {
-        position: fixed;
-
-        border-radius: 50%;
-
-        filter: blur(80px);
-
-        opacity: 0.35;
-
-        z-index: -1;
-
-        pointer-events: none;
-    }
-
-    .orb-one {
-        width: 400px;
-        height: 400px;
-
-        background: #60a5fa;
-
-        top: -150px;
-        left: -100px;
-    }
-
-    .orb-two {
-        width: 350px;
-        height: 350px;
-
-        background: #67e8f9;
-
-        right: -100px;
-        top: 200px;
-    }
-
-
-    /* ============================
-       MAIN CONTAINER
-    ============================ */
-
-    .container {
-        width: min(1100px, 92%);
-
-        margin: auto;
-
-        padding-bottom: 80px;
-    }
-
-
-    /* ============================
-       NAVBAR
-    ============================ */
-
-    nav {
-        display: flex;
-
-        align-items: center;
-
-        justify-content: space-between;
-
-        padding: 24px 0;
-    }
-
-    .logo {
-        display: flex;
-
-        align-items: center;
-
-        gap: 12px;
-
-        font-family: "Plus Jakarta Sans";
-
-        font-size: 20px;
-
-        font-weight: 800;
-    }
-
-    .logo-icon {
-        width: 42px;
-        height: 42px;
-
-        border-radius: 13px;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        color: white;
-
-        background:
-            linear-gradient(
-                135deg,
-                var(--primary),
-                var(--secondary)
-            );
-
-        box-shadow:
-            0 10px 25px
-            rgba(37, 99, 235, 0.25);
-    }
-
-    .nav-badge {
-        padding: 8px 14px;
-
-        border-radius: 50px;
-
-        background: rgba(255,255,255,0.7);
-
-        border: 1px solid var(--border);
-
-        font-size: 13px;
-
-        color: var(--muted);
-
-        backdrop-filter: blur(10px);
-    }
-
-
-    /* ============================
-       HERO
-    ============================ */
-
-    .hero {
-        text-align: center;
-
-        padding:
-            70px 0
-            50px;
-    }
-
-    .hero-badge {
-
-        display: inline-flex;
-
-        align-items: center;
-
-        gap: 8px;
-
-        padding:
-            8px
-            16px;
-
-        border-radius: 50px;
-
-        background:
-            rgba(37,99,235,0.08);
-
-        color:
-            var(--primary);
-
-        font-size:
-            14px;
-
-        font-weight:
-            600;
-
-        margin-bottom:
-            22px;
-    }
-
-    .pulse {
-        width: 8px;
-        height: 8px;
-
-        border-radius: 50%;
-
-        background: #22c55e;
-
-        box-shadow:
-            0 0 0 6px
-            rgba(34,197,94,0.12);
-    }
-
-
-    .hero h1 {
-
-        font-family:
-            "Plus Jakarta Sans";
-
-        font-size:
-            clamp(
-                40px,
-                6vw,
-                72px
-            );
-
-        line-height:
-            1.05;
-
-        letter-spacing:
-            -2px;
-
-        max-width:
-            850px;
-
-        margin:
-            auto;
-
-        font-weight:
-            800;
-    }
-
-
-    .gradient-text {
-
-        background:
-            linear-gradient(
-                90deg,
-                #2563eb,
-                #06b6d4
-            );
-
-        -webkit-background-clip:
-            text;
-
-        -webkit-text-fill-color:
-            transparent;
-    }
-
-
-    .hero p {
-
-        margin:
-            24px auto;
-
-        max-width:
-            650px;
-
-        font-size:
-            18px;
-
-        line-height:
-            1.7;
-
-        color:
-            var(--muted);
-    }
-
-
-    /* ============================
-       FACT CHECK CARD
-    ============================ */
-
-    .fact-check-card {
-
-        position:
-            relative;
-
-        padding:
-            34px;
-
-        border-radius:
-            28px;
-
-        background:
-            rgba(255,255,255,0.75);
-
-        border:
-            1px solid
-            rgba(255,255,255,0.8);
-
-        box-shadow:
-            0 30px 70px
-            rgba(15,23,42,0.08);
-
-        backdrop-filter:
-            blur(20px);
-
-        max-width:
-            850px;
-
-        margin:
-            auto;
-    }
-
-
-    .input-label {
-
-        display:
-            flex;
-
-        align-items:
-            center;
-
-        gap:
-            10px;
-
-        font-size:
-            15px;
-
-        font-weight:
-            700;
-
-        margin-bottom:
-            12px;
-    }
-
-    .input-label span {
-
-        width:
-            28px;
-
-        height:
-            28px;
-
-        display:
-            flex;
-
-        align-items:
-            center;
-
-        justify-content:
-            center;
-
-        border-radius:
-            8px;
-
-        background:
-            rgba(37,99,235,0.1);
-
-        color:
-            var(--primary);
-    }
-
-
-    /* ============================
-       INPUT
-    ============================ */
-
-    .input-wrapper {
-
-        position:
-            relative;
-
-    }
-
-    #claimInput {
-
-        width:
-            100%;
-
-        padding:
-            20px
-            20px;
-
-        border-radius:
-            16px;
-
-        border:
-            1px solid
-            #e2e8f0;
-
-        background:
-            rgba(255,255,255,0.9);
-
-        font-family:
-            inherit;
-
-        font-size:
-            16px;
-
-        outline:
-            none;
-
-        transition:
-            0.25s;
-    }
-
-
-    #claimInput::placeholder {
-
-        color:
-            #94a3b8;
-    }
-
-
-    #claimInput:focus {
-
-        border-color:
-            var(--primary);
-
-        box-shadow:
-            0 0 0 4px
-            rgba(37,99,235,0.1);
-    }
-
-
-    /* ============================
-       BUTTON
-    ============================ */
-
-    #checkButton {
-
-        width:
-            100%;
-
-        margin-top:
-            16px;
-
-        padding:
-            18px;
-
-        border:
-            none;
-
-        border-radius:
-            16px;
-
-        cursor:
-            pointer;
-
-        font-family:
-            "Plus Jakarta Sans";
-
-        font-size:
-            16px;
-
-        font-weight:
-            700;
-
-        color:
-            white;
-
-        background:
-            linear-gradient(
-                135deg,
-                #2563eb,
-                #06b6d4
-            );
-
-        box-shadow:
-            0 15px 30px
-            rgba(37,99,235,0.25);
-
-        transition:
-            all
-            0.25s
-            ease;
-    }
-
-
-    #checkButton:hover:not(:disabled) {
-
-        transform:
-            translateY(-2px);
-
-        box-shadow:
-            0 20px 40px
-            rgba(37,99,235,0.3);
-    }
-
-
-    #checkButton:active {
-
-        transform:
-            translateY(0);
-    }
-
-
-    #checkButton:disabled {
-
-        opacity:
-            0.5;
-
-        cursor:
-            not-allowed;
-    }
-
-
-    /* ============================
-       EXAMPLES
-    ============================ */
-
-    .examples {
-
-        display:
-            flex;
-
-        flex-wrap:
-            wrap;
-
-        gap:
-            10px;
-
-        margin-top:
-            18px;
-    }
-
-
-    .example-chip {
-
-        border:
-            1px solid
-            #e2e8f0;
-
-        background:
-            white;
-
-        padding:
-            9px
-            14px;
-
-        border-radius:
-            50px;
-
-        font-size:
-            13px;
-
-        color:
-            var(--muted);
-
-        cursor:
-            pointer;
-
-        transition:
-            0.2s;
-    }
-
-
-    .example-chip:hover {
-
-        border-color:
-            var(--primary);
-
-        color:
-            var(--primary);
-
-        background:
-            rgba(37,99,235,0.04);
-    }
-
-
-    /* ============================
-       STATUS
-    ============================ */
-
-    #statusMessage {
-
-        margin-top:
-            22px;
-
-        padding:
-            16px;
-
-        border-radius:
-            14px;
-
-        display:
-            flex;
-
-        align-items:
-            center;
-
-        justify-content:
-            center;
-
-        gap:
-            10px;
-
-        font-size:
-            14px;
-
-        font-weight:
-            600;
-    }
-
-
-    .hidden {
-
-        display:
-            none !important;
-    }
-
-
-    .loading {
-
-        background:
-            #eff6ff;
-
-        color:
-            #2563eb;
-
-        border:
-            1px solid
-            #bfdbfe;
-    }
-
-
-    .success {
-
-        background:
-            #f0fdf4;
-
-        color:
-            #15803d;
-
-        border:
-            1px solid
-            #bbf7d0;
-    }
-
-
-    .error {
-
-        background:
-            #fef2f2;
-
-        color:
-            #dc2626;
-
-        border:
-            1px solid
-            #fecaca;
-    }
-
-
-    /* ============================
-       SPINNER
-    ============================ */
-
-    .spinner {
-
-        width:
-            18px;
-
-        height:
-            18px;
-
-        border:
-            3px solid
-            rgba(37,99,235,0.2);
-
-        border-top-color:
-            #2563eb;
-
-        border-radius:
-            50%;
-
-        animation:
-            spin
-            0.8s
-            linear
-            infinite;
-    }
-
-
-    @keyframes spin {
-
-        to {
-
-            transform:
-                rotate(360deg);
-
-        }
-
-    }
-
-
-    /* ============================
-       RESULTS
-    ============================ */
-
-    #results-container {
-
-        margin-top:
-            28px;
-
-    }
-
-
-    #initialMessage {
-
-        text-align:
-            center;
-
-        padding:
-            45px
-            20px;
-
-        color:
-            #94a3b8;
-
-        font-size:
-            15px;
-    }
-
-
-    #responseText {
-
-        padding:
-            28px;
-
-        border-radius:
-            20px;
-
-        background:
-            rgba(248,250,252,0.8);
-
-        border:
-            1px solid
-            #e2e8f0;
-
-        line-height:
-            1.8;
-
-        color:
-            #475569;
-
-        animation:
-            fadeUp
-            0.4s
-            ease;
-    }
-
-
-    /* ============================
-       FORMATTED RESPONSE
-    ============================ */
-
-    .verdict-title {
-
-        font-family:
-            "Plus Jakarta Sans";
-
-        font-size:
-            24px;
-
-        font-weight:
-            800;
-
-        color:
-            #1e293b;
-
-        margin-bottom:
-            16px;
-    }
-
-
-    .section-title {
-
-        margin-top:
-            24px;
-
-        margin-bottom:
-            10px;
-
-        font-weight:
-            700;
-
-        color:
-            #2563eb;
-    }
-
-
-    .response-paragraph {
-
-        margin-bottom:
-            12px;
-    }
-
-
-    /* ============================
-       SOURCE
-    ============================ */
-
-    #sourcesList {
-
-        margin-top:
-            16px;
-
-        text-align:
-            center;
-
-        color:
-            #94a3b8;
-
-        font-size:
-            13px;
-    }
-
-
-    /* ============================
-       FEATURES
-    ============================ */
-
-    .features {
-
-        display:
-            grid;
-
-        grid-template-columns:
-            repeat(3, 1fr);
-
-        gap:
-            18px;
-
-        margin-top:
-            60px;
-    }
-
-
-    .feature {
-
-        padding:
-            24px;
-
-        border-radius:
-            20px;
-
-        background:
-            rgba(255,255,255,0.6);
-
-        border:
-            1px solid
-            rgba(226,232,240,0.8);
-
-        transition:
-            0.25s;
-    }
-
-
-    .feature:hover {
-
-        transform:
-            translateY(-5px);
-
-        box-shadow:
-            0 20px 40px
-            rgba(15,23,42,0.06);
-    }
-
-
-    .feature-icon {
-
-        width:
-            46px;
-
-        height:
-            46px;
-
-        display:
-            flex;
-
-        align-items:
-            center;
-
-        justify-content:
-            center;
-
-        border-radius:
-            14px;
-
-        background:
-            #eff6ff;
-
-        font-size:
-            22px;
-
-        margin-bottom:
-            16px;
-    }
-
-
-    .feature h3 {
-
-        font-family:
-            "Plus Jakarta Sans";
-
-        margin-bottom:
-            8px;
-    }
-
-
-    .feature p {
-
-        color:
-            var(--muted);
-
-        font-size:
-            14px;
-
-        line-height:
-            1.6;
-    }
-
-
-    /* ============================
-       FOOTER
-    ============================ */
-
-    footer {
-
-        text-align:
-            center;
-
-        margin-top:
-            70px;
-
-        color:
-            #94a3b8;
-
-        font-size:
-            13px;
-    }
-
-
-    /* ============================
-       ANIMATIONS
-    ============================ */
-
-    @keyframes fadeUp {
-
-        from {
-
-            opacity:
-                0;
-
-            transform:
-                translateY(15px);
-
-        }
-
-        to {
-
-            opacity:
-                1;
-
-            transform:
-                translateY(0);
-
-        }
-
-    }
-
-
-    /* ============================
-       RESPONSIVE
-    ============================ */
-
-    @media (max-width: 768px) {
-
-        .hero {
-
-            padding-top:
-                45px;
-
-        }
-
-        .fact-check-card {
-
-            padding:
-                22px;
-
-            border-radius:
-                22px;
-
-        }
-
-        .features {
-
-            grid-template-columns:
-                1fr;
-
-        }
-
-        .nav-badge {
-
-            display:
-                none;
-
-        }
-
-    }
-
-</style>
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
 
 
 </head>
@@ -1063,875 +26,297 @@
 <body>
 
 
-<!-- Background decoration -->
-
-<div class="background-orb orb-one"></div>
-
-<div class="background-orb orb-two"></div>
+    <!-- Background decoration -->
+    <div class="background-orb orb-one"></div>
+    <div class="background-orb orb-two"></div>
 
 
-<div class="container">
+    <div class="container">
 
 
-    <!-- ============================
+        <!-- ============================
          NAVIGATION
     ============================ -->
 
-    <nav>
+        <nav>
 
-        <div class="logo">
+            <div class="logo">
 
-            <div class="logo-icon">
-                ✚
+                <div class="logo-icon">
+                    ✚
+                </div>
+
+                <span>TinyHealth</span>
+
             </div>
 
-            TinyHealth
 
-        </div>
+            <div class="nav-badge">
 
+                🤖 Powered by TinyLlama
 
-        <div class="nav-badge">
+            </div>
 
-            🤖 Powered by TinyLlama
-
-        </div>
-
-    </nav>
-
-
-
-    <!-- ============================
-         HERO
-    ============================ -->
-
-    <section class="hero">
-
-
-        <div class="hero-badge">
-
-            <span class="pulse"></span>
-
-            AI Health Intelligence
-
-        </div>
-
-
-        <h1>
-
-            Understand health claims
-
-            <span class="gradient-text">
-
-                before you believe them.
-
-            </span>
-
-        </h1>
-
-
-        <p>
-
-            TinyHealth uses your custom AI model to analyze
-            health claims and help identify whether they are
-            credible, misleading, or potentially a myth.
-
-        </p>
-
-
-    </section>
-
-
-
-    <!-- ============================
-         FACT CHECK CARD
-    ============================ -->
-
-    <main class="fact-check-card">
-
-
-        <label
-            for="claimInput"
-            class="input-label"
-        >
-
-            <span>✦</span>
-
-            What health claim would you like to check?
-
-        </label>
-
-
-
-        <div class="input-wrapper">
-
-            <input
-                type="text"
-                id="claimInput"
-
-                placeholder="Example: Does drinking cold water cause a cold?"
-            >
-
-        </div>
-
-
-
-        <button
-            id="checkButton"
-            disabled
-        >
-
-            ✨ Analyze Health Claim
-
-        </button>
-
-
-
-        <!-- Example claims -->
-
-        <div class="examples">
-
-            <button class="example-chip">
-
-                Tea tree oil cures acne
-
-            </button>
-
-
-            <button class="example-chip">
-
-                Sugar causes diabetes
-
-            </button>
-
-
-            <button class="example-chip">
-
-                Detox drinks remove toxins
-
-            </button>
-
-        </div>
-
-
-
-        <!-- Status -->
-
-        <div
-            id="statusMessage"
-            class="hidden"
-        >
-
-            <div
-                id="spinner"
-                class="spinner"
-            ></div>
-
-            <span id="statusText">
-
-                Analyzing your claim...
-
-            </span>
-
-        </div>
+        </nav>
 
 
 
         <!-- ============================
+         HERO SECTION
+    ============================ -->
+
+        <section class="hero">
+
+            <h1>
+
+                Understand health claims
+
+                <span class="gradient-text">
+                    before you believe them.
+                </span>
+
+            </h1>
+
+
+            <p>
+
+                TinyHealth uses TinyHealth-1 AI model powered by TinyLlama to analyze
+                health claims and help identify whether they are
+                credible, misleading, or potentially a myth.
+
+            </p>
+
+
+        </section>
+
+
+
+        <!-- ============================
+         FACT CHECKER
+    ============================ -->
+
+        <main class="fact-check-card">
+
+
+            <!-- Input label -->
+
+            <label for="claimInput" class="input-label">
+
+                <span>✦</span>
+
+                What health claim would you like to check?
+
+            </label>
+
+
+
+            <!-- Claim input -->
+
+            <div class="input-wrapper">
+
+                <input type="text" id="claimInput" placeholder="Example: Does drinking cold water cause a cold?"
+                    autocomplete="off">
+
+            </div>
+
+
+
+            <!-- Analyze button -->
+
+            <button id="checkButton" disabled>
+
+                ✨ Analyze Health Claim
+
+            </button>
+
+
+
+            <!-- ============================
+             EXAMPLE CLAIMS
+        ============================ -->
+
+            <div class="examples">
+
+
+                <button class="example-chip" type="button">
+                    Tea tree oil cures acne
+                </button>
+
+
+                <button class="example-chip" type="button">
+                    Sugar causes diabetes
+                </button>
+
+
+                <button class="example-chip" type="button">
+                    Detox drinks remove toxins
+                </button>
+
+
+            </div>
+
+
+
+            <!-- ============================
+             STATUS MESSAGE
+        ============================ -->
+
+            <div id="statusMessage" class="hidden">
+
+                <div id="spinner" class="spinner"></div>
+
+
+                <span id="statusText">
+                    Analyzing your claim...
+                </span>
+
+            </div>
+
+
+
+            <!-- ============================
              RESULTS
         ============================ -->
 
-        <div id="results-container">
+            <section id="results-container">
 
 
-            <p id="initialMessage">
+                <!-- Initial message -->
 
-                ✦ Enter a health claim above and let TinyHealth
-                analyze it using your custom AI model.
+                <p id="initialMessage">
 
-            </p>
+                    ✦ Enter a health claim above and let TinyHealth
+                    analyze it using TinyHealth-1 AI model.
 
-
-            <div
-                id="responseText"
-                class="hidden"
-            ></div>
-
-
-            <div id="sourcesList"></div>
-
-
-        </div>
-
-
-    </main>
+                </p>
 
 
 
-    <!-- ============================
+                <!-- AI response -->
+
+                <div id="responseText" class="hidden"></div>
+
+
+
+                <!-- Model information -->
+
+                <div id="sourcesList"></div>
+
+
+            </section>
+
+
+        </main>
+
+
+
+        <!-- ============================
          FEATURES
     ============================ -->
 
-    <section class="features">
+        <section class="features">
 
 
-        <div class="feature">
+            <!-- Feature 1 -->
 
-            <div class="feature-icon">
+            <article class="feature">
 
-                🤖
-
-            </div>
-
-            <h3>
-
-                AI Powered
-
-            </h3>
-
-            <p>
-
-                Analyze health claims using your custom
-                TinyLlama language model.
-
-            </p>
-
-        </div>
+                <div class="feature-icon">
+                    🤖
+                </div>
 
 
+                <h3>
+                    AI Powered
+                </h3>
 
-        <div class="feature">
 
-            <div class="feature-icon">
+                <p>
 
-                ⚡
+                    Analyze health claims using TinyHealth-1 AI model
+                    powered by the TinyLlama language model.
 
-            </div>
+                </p>
 
-            <h3>
-
-                Fast Analysis
-
-            </h3>
-
-            <p>
-
-                Submit a claim and receive an AI-generated
-                analysis in seconds.
-
-            </p>
-
-        </div>
+            </article>
 
 
 
-        <div class="feature">
+            <!-- Feature 2 -->
 
-            <div class="feature-icon">
+            <article class="feature">
 
-                🔍
-
-            </div>
-
-            <h3>
-
-                Easy to Understand
-
-            </h3>
-
-            <p>
-
-                Get clear explanations instead of complicated
-                medical terminology.
-
-            </p>
-
-        </div>
+                <div class="feature-icon">
+                    ⚡
+                </div>
 
 
-    </section>
+                <h3>
+                    Fast Analysis
+                </h3>
+
+
+                <p>
+
+                    Submit a claim and receive an AI-generated
+                    analysis in seconds.
+
+                </p>
+
+            </article>
 
 
 
-    <!-- ============================
+            <!-- Feature 3 -->
+
+            <article class="feature">
+
+                <div class="feature-icon">
+                    🔍
+                </div>
+
+
+                <h3>
+                    Easy to Understand
+                </h3>
+
+
+                <p>
+
+                    Get clear explanations instead of complicated
+                    medical terminology.
+
+                </p>
+
+            </article>
+
+
+        </section>
+
+
+
+        <!-- ============================
          FOOTER
     ============================ -->
 
-    <footer>
+        <footer>
 
-        TinyHealth • AI-powered health claim analysis
+            <p>
+                TinyHealth • AI-powered health claim analysis
+                <br>
+                Designed & Developed by - <strong><a href="https://samarthshukla.vercel.app/">Samarth
+                        Shukla</a></strong>
+            </p>
 
-    </footer>
+        </footer>
 
 
-</div>
+    </div>
 
 
-
-<!-- ============================
-     JAVASCRIPT
-============================ -->
-
-<script>
-
-
-    /* ========================================
-       CONFIGURATION
-    ======================================== */
-
-    const HUGGINGFACE_ENDPOINT =
-        "https://samarthshukla-TinyHealth1-inference.hf.space/check_claim";
-
-
-
-    /* ========================================
-       ELEMENTS
-    ======================================== */
-
-    const claimInput =
-        document.getElementById("claimInput");
-
-
-    const checkButton =
-        document.getElementById("checkButton");
-
-
-    const statusMessage =
-        document.getElementById("statusMessage");
-
-
-    const statusText =
-        document.getElementById("statusText");
-
-
-    const spinner =
-        document.getElementById("spinner");
-
-
-    const responseTextDiv =
-        document.getElementById("responseText");
-
-
-    const initialMessage =
-        document.getElementById("initialMessage");
-
-
-    const sourcesListDiv =
-        document.getElementById("sourcesList");
-
-
-
-    /* ========================================
-       ENABLE / DISABLE BUTTON
-    ======================================== */
-
-    function updateButtonState() {
-
-        checkButton.disabled =
-            !claimInput.value.trim();
-
-    }
-
-
-    claimInput.addEventListener(
-        "input",
-        updateButtonState
-    );
-
-
-
-    /* ========================================
-       EXAMPLE CHIPS
-    ======================================== */
-
-    document
-        .querySelectorAll(".example-chip")
-        .forEach(chip => {
-
-            chip.addEventListener(
-                "click",
-                () => {
-
-                    claimInput.value =
-                        chip.textContent.trim();
-
-                    updateButtonState();
-
-                    claimInput.focus();
-
-                }
-            );
-
-        });
-
-
-
-    /* ========================================
-       ENTER KEY
-    ======================================== */
-
-    claimInput.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter" &&
-                !checkButton.disabled
-            ) {
-
-                handleFactCheck();
-
-            }
-
-        }
-    );
-
-
-
-    /* ========================================
-       BUTTON CLICK
-    ======================================== */
-
-    checkButton.addEventListener(
-        "click",
-        handleFactCheck
-    );
-
-
-
-    /* ========================================
-       MAIN FACT CHECK FUNCTION
-    ======================================== */
-
-    async function handleFactCheck() {
-
-
-        const userClaim =
-            claimInput.value.trim();
-
-
-        const TIMEOUT_MS =
-            60000;
-
-
-        if (!userClaim) {
-
-            setStatus(
-                "Please enter a health claim first.",
-                "error",
-                false
-            );
-
-            return;
-
-        }
-
-
-
-        /* Reset UI */
-
-        initialMessage.classList.add("hidden");
-
-        responseTextDiv.classList.add("hidden");
-
-        sourcesListDiv.innerHTML = "";
-
-
-        /* Loading state */
-
-        setStatus(
-            "Analyzing your claim using TinyHealth AI...",
-            "loading",
-            true
-        );
-
-
-        checkButton.disabled = true;
-
-
-        checkButton.innerHTML =
-            "Analyzing...";
-
-
-
-        try {
-
-
-            const controller =
-                new AbortController();
-
-
-            const timeoutId =
-                setTimeout(
-                    () => controller.abort(),
-                    TIMEOUT_MS
-                );
-
-
-            const resultText =
-                await callCustomModelAPI(
-                    userClaim,
-                    controller.signal
-                );
-
-
-            clearTimeout(timeoutId);
-
-
-
-            /* Format response */
-
-            responseTextDiv.innerHTML =
-                formatResponse(
-                    resultText
-                );
-
-
-            responseTextDiv.classList.remove(
-                "hidden"
-            );
-
-
-            sourcesListDiv.innerHTML =
-                "Powered by your custom TinyLlama model";
-
-
-
-            setStatus(
-                "Analysis complete!",
-                "success",
-                false
-            );
-
-
-        }
-
-
-        catch (error) {
-
-
-            console.error(
-                "Fact checking failed:",
-                error
-            );
-
-
-            let errorMessage =
-                "Something went wrong. Please try again.";
-
-
-            if (
-                error.name === "AbortError"
-            ) {
-
-                errorMessage =
-                    "The request timed out. The server may be waking up. Please try again.";
-
-            }
-
-
-            else if (
-                error.message.includes("404")
-            ) {
-
-                errorMessage =
-                    "Server not found. Please check your Hugging Face Space.";
-
-            }
-
-
-            else if (
-                error.message.includes("500")
-            ) {
-
-                errorMessage =
-                    "The model encountered an internal server error.";
-
-            }
-
-
-            setStatus(
-                errorMessage,
-                "error",
-                false
-            );
-
-
-        }
-
-
-        finally {
-
-
-            checkButton.disabled =
-                !claimInput.value.trim();
-
-
-            checkButton.innerHTML =
-                "✨ Analyze Health Claim";
-
-
-        }
-
-
-    }
-
-
-
-    /* ========================================
-       API CALL
-    ======================================== */
-
-    async function callCustomModelAPI(
-        claim,
-        signal
-    ) {
-
-
-        const response =
-            await fetch(
-                HUGGINGFACE_ENDPOINT,
-                {
-
-                    method:
-                        "POST",
-
-
-                    headers:
-                        {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-
-                    body:
-                        JSON.stringify(
-                            {
-                                claim:
-                                    claim
-                            }
-                        ),
-
-
-                    signal:
-                        signal
-
-                }
-            );
-
-
-        if (signal.aborted) {
-
-            throw new DOMException(
-                "Aborted",
-                "AbortError"
-            );
-
-        }
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                `API Request failed with status: ${response.status}`
-            );
-
-        }
-
-
-        const result =
-            await response.json();
-
-
-        if (result.error) {
-
-            throw new Error(
-                result.error
-            );
-
-        }
-
-
-        return result.verdict;
-
-
-    }
-
-
-
-    /* ========================================
-       STATUS HANDLER
-    ======================================== */
-
-    function setStatus(
-        message,
-        type,
-        showSpinner
-    ) {
-
-
-        statusMessage.className =
-            type;
-
-
-        statusMessage.id =
-            "statusMessage";
-
-
-        statusText.textContent =
-            message;
-
-
-        statusMessage.classList.remove(
-            "hidden"
-        );
-
-
-        if (showSpinner) {
-
-            spinner.style.display =
-                "block";
-
-        }
-
-        else {
-
-            spinner.style.display =
-                "none";
-
-        }
-
-
-        /* Hide success after 5 seconds */
-
-        if (
-            type === "success"
-        ) {
-
-            setTimeout(
-                () => {
-
-                    statusMessage.classList.add(
-                        "hidden"
-                    );
-
-                },
-                5000
-            );
-
-        }
-
-
-    }
-
-
-
-    /* ========================================
-       FORMAT AI RESPONSE
-    ======================================== */
-
-    function formatResponse(text) {
-
-
-        const lines =
-            text
-                .split("\n")
-                .filter(
-                    line =>
-                        line.trim() !== ""
-                );
-
-
-        let html =
-            "";
-
-
-        lines.forEach(
-            line => {
-
-
-                const cleanLine =
-                    line
-                        .replace(
-                            /\*\*/g,
-                            ""
-                        )
-                        .trim();
-
-
-
-                /* Verdict */
-
-                if (
-                    line.toLowerCase()
-                        .includes("verdict")
-                ) {
-
-
-                    html += `
-
-                        <div class="verdict-title">
-
-                            ${cleanLine}
-
-                        </div>
-
-                    `;
-
-                }
-
-
-
-                /* Headings */
-
-                else if (
-                    line.startsWith("**")
-                ) {
-
-
-                    html += `
-
-                        <div class="section-title">
-
-                            ${cleanLine}
-
-                        </div>
-
-                    `;
-
-                }
-
-
-
-                /* Normal paragraph */
-
-                else {
-
-
-                    html += `
-
-                        <p class="response-paragraph">
-
-                            ${cleanLine}
-
-                        </p>
-
-                    `;
-
-                }
-
-
-            }
-        );
-
-
-        return html;
-
-
-    }
-
-
-</script>
-
+    <!-- JavaScript -->
+    <script src="script.js"></script>
 
 </body>
+
 </html>
